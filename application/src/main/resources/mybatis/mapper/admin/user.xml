@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="AdminUserDAO">
+
+    <sql id="searchCondition">
+		
+    </sql>
+
+	<select id="selectList" resultType="com.model.UserVO">
+ 		SELECT
+			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
+			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
+		FROM users u
+		JOIN user_profiles up ON u.id = up.user_id
+		ORDER BY u.id DESC
+	</select>
+
+	<select id="selectListTotalCount" resultType="int">
+ 		SELECT
+			COUNT(*) AS count
+		FROM users u
+		JOIN user_profiles up ON u.id = up.user_id
+	</select>
+
+	<select id="select" parameterType="String" resultType="com.model.UserVO">
+		SELECT
+			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
+			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
+		FROM users u
+		JOIN user_profiles up ON u.id = up.user_id
+		WHERE u.removed = 0
+			AND u.id = #{id}
+	</select>
+
+	<insert id="insert" parameterType="com.model.UserVO">
+		INSERT INTO users (
+			password, role, status, phone
+		<if test="naverId != null and naverId != ''">
+			, naver_id
+		</if>
+		<if test="kakaoId != null and kakaoId != ''">
+			, kakao_id
+		</if>
+		<if test="appleId != null and appleId != ''">
+			, apple_id
+		</if>
+		) VALUES (
+			#{password}, #{role}, #{status}, #{phone}
+		<if test="naverId != null and naverId != ''">
+			, #{naverId}
+		</if>
+		<if test="kakaoId != null and kakaoId != ''">
+			, #{kakaoId}
+		</if>
+		<if test="appleId != null and appleId != ''">
+			, #{appleId}
+		</if>
+		)
+			
+		<selectKey keyProperty="id" resultType="String"> <!-- parameterType vo의 id로 반환됨 -->
+        	SELECT LAST_INSERT_ID()
+  		</selectKey>
+	</insert>
+
+	<insert id="insertUserProfile" parameterType="com.model.UserVO">
+		INSERT INTO user_profiles (
+			user_id, full_name, nick_name, gender
+		<if test="picture != null and picture != ''">
+			, picture
+		</if>
+		<if test="fcmNotice != null and fcmNotice != ''">
+			, fcm_notice
+		</if>
+		<if test="birthd != null and birthd != ''">
+			, birthd
+		</if>
+		<if test="address != null and address != ''">
+			, address
+		</if>
+		<if test="addressDetail != null and addressDetail != ''">
+			, address_detail
+		</if>
+		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
+			, agree_privacy_3party
+		</if>
+		<if test="agreeMarketing != null and agreeMarketing != ''">
+			, agree_marketing
+		</if>
+		) VALUES (
+			#{id}, #{fullName}, #{nickName}, #{gender}
+		<if test="picture != null and picture != ''">
+			, #{picture}
+		</if>
+		<if test="fcmNotice != null and fcmNotice != ''">
+			, #{fcmNotice}
+		</if>
+		<if test="birthd != null and birthd != ''">
+			, #{birthd}
+		</if>
+		<if test="address != null and address != ''">
+			, #{address}
+		</if>
+		<if test="addressDetail != null and addressDetail != ''">
+			, #{addressDetail}
+		</if>
+		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
+			, #{agreePrivacy3Party}
+		</if>
+		<if test="agreeMarketing != null and agreeMarketing != ''">
+			, #{agreeMarketing}
+		</if>
+		)
+
+		<!-- <selectKey keyProperty="id" resultType="String">  parameterType vo의 id로 반환됨
+        	SELECT LAST_INSERT_ID()
+  		</selectKey> -->
+		
+	</insert>
+
+	<update id="update" parameterType="com.model.UserVO">
+		UPDATE users SET
+			phone = #{phone}
+		<if test="email != null">
+			, email = #{email}
+		</if>
+		<if test="role != null">
+			, role = #{role}
+		</if>
+		<if test="status != null">
+			, status = #{status}
+		</if>
+		<if test="newPassword != null">
+			, password = #{newPassword}
+		</if>
+		WHERE id = #{id}
+	</update>
+
+	
+	<update id="updateUserProfile" parameterType="com.model.UserVO">
+		UPDATE user_profiles SET
+			user_id = #{id}
+		<if test="gender != null">
+			, gender = #{gender}
+		</if>
+		<if test="fullName != null">
+			, full_name = #{fullName}
+		</if>
+		<if test="nickName != null">
+			, nick_name = #{nickName}
+		</if>
+		<if test="picture != null">
+			, picture = #{picture}
+		</if>
+		<if test="birthd != null">
+			, birthd = #{birthd}
+		</if>
+		<if test="agreePrivacy3Party != null">
+			, agree_privacy_3party =  #{agreePrivacy3Party}
+		</if>
+		<if test="agree_marketing != null">
+			, agree_marketing = #{#{agreeMarketing}}
+		</if>
+		<if test="fcmNotice != null">
+			, fcm_notice = #{fcmNotice}
+		</if>
+		<if test="memo != null">
+			, memo = #{memo}
+		</if>
+		<if test="address != null">
+			, address = #{address}
+		</if>
+		<if test="addressDetail != null">
+			, address_detail = #{addressDetail}
+		</if>
+
+		WHERE user_id = #{id}
+	</update>
+
+	<!-- <delete id="delete" parameterType="String">
+		DELETE FROM users
+		WHERE id = #{id}
+	</delete> -->
+
+	<update id="delete" parameterType="String">
+		UPDATE users SET
+			removed = 1,
+			removed_time = NOW()
+		WHERE id = #{id}
+	</update>
+
+	<delete id="deleteUserProfile" parameterType="String">
+		DELETE FROM user_profiles
+		WHERE user_id = #{id}
+	</delete>
+</mapper>
