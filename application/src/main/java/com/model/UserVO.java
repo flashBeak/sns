@@ -1,6 +1,9 @@
 package com.model;
 
 public class UserVO {
+
+	public static int USER_ROLE_ADMIN = 9;
+
     private String id;
     private String username;
     private String password;

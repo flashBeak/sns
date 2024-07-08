@@ -24,5 +24,25 @@ public class AdminUserDAO {
 	public UserVO get(String id) throws Exception {
 		return sqlSession.selectOne("AdminUserDAO.select", id);
     }
+
+	public int add(UserVO item) throws Exception {
+		return sqlSession.insert("AdminUserDAO.insert", item);
+    }
+
+	public int addInfo(UserVO item) throws Exception {
+		return sqlSession.insert("AdminUserDAO.insertInfo", item);
+    }
+
+	public int update(UserVO item) throws Exception {
+		return sqlSession.update("AdminUserDAO.update", item);
+    }
+
+	public int updateInfo(UserVO item) throws Exception {
+		return sqlSession.update("AdminUserDAO.updateInfo", item);
+    }
+
+	public int remove(String id) throws Exception {
+		return sqlSession.delete("AdminUserDAO.delete", id);
+    }
 }
 

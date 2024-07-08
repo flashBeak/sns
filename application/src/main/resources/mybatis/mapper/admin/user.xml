@@ -35,7 +35,7 @@
 
 	<insert id="insert" parameterType="com.model.UserVO">
 		INSERT INTO users (
-			password, role, status, phone
+			password, phone
 		<if test="naverId != null and naverId != ''">
 			, naver_id
 		</if>
@@ -46,7 +46,7 @@
 			, apple_id
 		</if>
 		) VALUES (
-			#{password}, #{role}, #{status}, #{phone}
+			#{password}, #{phone}
 		<if test="naverId != null and naverId != ''">
 			, #{naverId}
 		</if>
@@ -58,22 +58,22 @@
 		</if>
 		)
 			
-		<selectKey keyProperty="id" resultType="String"> <!-- parameterType vo의 id로 반환됨 -->
+		<selectKey keyProperty="id" resultType="String">
         	SELECT LAST_INSERT_ID()
   		</selectKey>
 	</insert>
 
-	<insert id="insertUserProfile" parameterType="com.model.UserVO">
+	<insert id="insertInfo" parameterType="com.model.UserVO">
 		INSERT INTO user_profiles (
-			user_id, full_name, nick_name, gender
+			user_id, full_name, nick_name, gender, birthd
 		<if test="picture != null and picture != ''">
 			, picture
 		</if>
 		<if test="fcmNotice != null and fcmNotice != ''">
 			, fcm_notice
 		</if>
-		<if test="birthd != null and birthd != ''">
-			, birthd
+		<if test="fcmGroupNotice != null and fcmGroupNotice != ''">
+			, fcm_group_notice
 		</if>
 		<if test="address != null and address != ''">
 			, address
@@ -84,19 +84,16 @@
 		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
 			, agree_privacy_3party
 		</if>
-		<if test="agreeMarketing != null and agreeMarketing != ''">
-			, agree_marketing
-		</if>
 		) VALUES (
-			#{id}, #{fullName}, #{nickName}, #{gender}
+			#{id}, #{fullName}, #{nickName}, #{gender}, #{birthd}
 		<if test="picture != null and picture != ''">
 			, #{picture}
 		</if>
 		<if test="fcmNotice != null and fcmNotice != ''">
 			, #{fcmNotice}
 		</if>
-		<if test="birthd != null and birthd != ''">
-			, #{birthd}
+		<if test="fcmGroupNotice != null and fcmGroupNotice != ''">
+			, #{fcmGroupNotice}
 		</if>
 		<if test="address != null and address != ''">
 			, #{address}
@@ -107,23 +104,12 @@
 		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
 			, #{agreePrivacy3Party}
 		</if>
-		<if test="agreeMarketing != null and agreeMarketing != ''">
-			, #{agreeMarketing}
-		</if>
 		)
-
-		<!-- <selectKey keyProperty="id" resultType="String">  parameterType vo의 id로 반환됨
-        	SELECT LAST_INSERT_ID()
-  		</selectKey> -->
-		
 	</insert>
 
 	<update id="update" parameterType="com.model.UserVO">
 		UPDATE users SET
 			phone = #{phone}
-		<if test="email != null">
-			, email = #{email}
-		</if>
 		<if test="role != null">
 			, role = #{role}
 		</if>
@@ -135,16 +121,13 @@
 		</if>
 		WHERE id = #{id}
 	</update>
-
 	
-	<update id="updateUserProfile" parameterType="com.model.UserVO">
+	<update id="updateInfo" parameterType="com.model.UserVO">
 		UPDATE user_profiles SET
-			user_id = #{id}
+			user_id = #{id},
+			full_name = #{fullNaem}
 		<if test="gender != null">
 			, gender = #{gender}
-		</if>
-		<if test="fullName != null">
-			, full_name = #{fullName}
 		</if>
 		<if test="nickName != null">
 			, nick_name = #{nickName}
@@ -158,14 +141,11 @@
 		<if test="agreePrivacy3Party != null">
 			, agree_privacy_3party =  #{agreePrivacy3Party}
 		</if>
-		<if test="agree_marketing != null">
-			, agree_marketing = #{#{agreeMarketing}}
-		</if>
 		<if test="fcmNotice != null">
 			, fcm_notice = #{fcmNotice}
 		</if>
-		<if test="memo != null">
-			, memo = #{memo}
+		<if test="fcmGroupNotice != null">
+			, fcm_group_notice = #{fcmGroupNotice}
 		</if>
 		<if test="address != null">
 			, address = #{address}
@@ -177,20 +157,10 @@
 		WHERE user_id = #{id}
 	</update>
 
-	<!-- <delete id="delete" parameterType="String">
-		DELETE FROM users
-		WHERE id = #{id}
-	</delete> -->
-
 	<update id="delete" parameterType="String">
 		UPDATE users SET
 			removed = 1,
 			removed_time = NOW()
 		WHERE id = #{id}
 	</update>
-
-	<delete id="deleteUserProfile" parameterType="String">
-		DELETE FROM user_profiles
-		WHERE user_id = #{id}
-	</delete>
 </mapper>
