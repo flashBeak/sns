@@ -5,10 +5,13 @@
 USE sns;
 
 DROP TABLE IF EXISTS `files`;
+DROP TABLE IF EXISTS `category_permission`;
+DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `group_manager`;
 DROP TABLE IF EXISTS `group_member`;
 DROP TABLE IF EXISTS `group_notice`;
 DROP TABLE IF EXISTS `post_like`;
+DROP TABLE IF EXISTS `view`;
 DROP TABLE IF EXISTS `comment`;
 DROP TABLE IF EXISTS `post`;
 DROP TABLE IF EXISTS `qna`;
@@ -25,7 +28,7 @@ CREATE TABLE `users` ( --  사용자 정보
 	`kakao_id` VARCHAR(255),
 	`apple_id` VARCHAR(255),
 	`password` VARCHAR(255),
-	`role` CHAR(1) DEFAULT '1',	-- 1 사용자, 9 관리자.. 추후 group manager를 role로 처리할 수도 있음
+	`role` CHAR(1) DEFAULT '1',	-- 1 사용자, 9 관리자
 	`status` CHAR(1) DEFAULT '1',  -- 0 승인 대기, 1 승인
 	`banned` CHAR(1) DEFAULT '0',
 	`removed` CHAR(1) DEFAULT '0', -- 회원 탈퇴 여부 0 탈퇴 안함, 1 탈퇴함
@@ -76,14 +79,33 @@ CREATE TABLE `group` (	-- 그룹
 	`etc` TEXT,	-- 기타
 	`lot` FLOAT,	-- 경도 x
 	`lat` FLOAT,	-- 위도 y
-	`phone` VARCHAR(20)	-- 전화번호
-	-- 대표 사진
-	-- 배경 사진
+	`phone` VARCHAR(20),	-- 전화번호
+	`represent_image` VARCHAR(255),	-- 대표사진
+	`background_image` VARCHAR(255)	-- 배경사진
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 그룹 카테고리
+CREATE TABLE `category` (	-- 그룹 카테고리
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	`group_id` INT(10) UNSIGNED NOT NULL,
+    `name` VARCHAR(128) NOT NULL,	-- 이름
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+	INDEX idx_category_group_id (`group_id`),
+	CONSTRAINT `fk_category_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `category_permission` (	-- 카테고리 권한
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `user_id` INT(10) UNSIGNED NOT NULL,	-- 사용자 아이디
+	`category_id` INT(10) UNSIGNED NOT NULL,	--  카테괴 아이디
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	
+	INDEX `index_category_permission_user_id` (`user_id`),
+	INDEX `index_category_permission_category_id` (`category_id`),
+    CONSTRAINT `fk_category_permission_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `fk_category_permission_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `group_member` (	-- 그룹 멤버
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -96,8 +118,6 @@ CREATE TABLE `group_member` (	-- 그룹 멤버
     CONSTRAINT `fk_group_member_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_group_member_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 그룹 권한 부여 ->
 
 CREATE TABLE `group_manager` (	-- 그룹 관리자
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -118,7 +138,6 @@ CREATE TABLE `group_notice` (	-- 그룹 공지 사항
 	`group_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 아이디
 	`title` VARCHAR(128) NOT NULL,	-- 제목
 	`contents` TEXT,	-- 내용
-	-- 파일 추가
 	`view` INT(20) UNSIGNED,	-- 조회수
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
 	`modifyd` TIMESTAMP,	-- 수정 일시. 조회수를 사용하기에, 수정 시 date를 입력해야 함
@@ -161,10 +180,10 @@ CREATE TABLE `post` (	-- 게시물
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
 	`user_id` INT(10) UNSIGNED NOT NULL,
 	`group_id` INT(10) UNSIGNED NOT NULL,
+	`category_id` INT(10) UNSIGNED,
     `title` VARCHAR(128) NOT NULL,	-- 제목
 	`contents` TEXT,	-- 내용
 	`type` VARCHAR(1), -- 0 전체 게시물, 1 그룹 게시물
-	-- 카테고리
 	`view` INT(20) UNSIGNED,	-- 조회수
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
 	`modifyd` TIMESTAMP,	-- 수정 일시. 조회수를 사용하기에, 수정 시 date를 입력해야 함
@@ -172,13 +191,15 @@ CREATE TABLE `post` (	-- 게시물
     INDEX `index_post_user_id` (`user_id`),
 	INDEX `index_post_group_id` (`group_id`),
 	INDEX `index_post_type` (`type`),
-    CONSTRAINT `fk_post_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	INDEX `index_post_category_id` (`category_id`),
+    CONSTRAINT `fk_post_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
+	CONSTRAINT `fk_post_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON UPDATE CASCADE,
 	CONSTRAINT `fk_post_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `comment` (	-- 댓글
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	-- 대댓글만 가능
+	`parent_id` INT(10) UNSIGNED,	-- 대댓그까지만 허용
 	`user_id` INT(10) UNSIGNED NOT NULL,
 	`post_id` INT(10) UNSIGNED NOT NULL,
 	`contents` TEXT,	-- 내용
@@ -189,6 +210,18 @@ CREATE TABLE `comment` (	-- 댓글
 	INDEX `index_comment_post_id` (`post_id`),
     CONSTRAINT `fk_comment_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_comment_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `view` (	-- 조회수
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	`user_id` INT(10) UNSIGNED NOT NULL,
+	`post_id` INT(10) UNSIGNED NOT NULL,
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	
+	INDEX `index_view_like_user_id` (`user_id`),
+	INDEX `index_view_like_post_id` (`post_id`),
+    CONSTRAINT `fk_view_like_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `fk_view_like_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `post_like` (	-- 게시물 좋아요
@@ -202,8 +235,6 @@ CREATE TABLE `post_like` (	-- 게시물 좋아요
     CONSTRAINT `fk_post_like_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_post_like_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 
 
 CREATE TABLE `files` (	-- 파일
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
