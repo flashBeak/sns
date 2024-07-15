@@ -77,7 +77,13 @@ CREATE TABLE `group` (	-- 그룹
 	`lot` FLOAT,	-- 경도 x
 	`lat` FLOAT,	-- 위도 y
 	`phone` VARCHAR(20)	-- 전화번호
+	-- 대표 사진
+	-- 배경 사진
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 그룹 카테고리
+
 
 CREATE TABLE `group_member` (	-- 그룹 멤버
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -91,8 +97,11 @@ CREATE TABLE `group_member` (	-- 그룹 멤버
 	CONSTRAINT `fk_group_member_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 그룹 권한 부여 ->
+
 CREATE TABLE `group_manager` (	-- 그룹 관리자
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	-- 타입 분리 0 그룹장, 1 운영진
 	`group_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 아이디
 	`group_member_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 멤버 아이디
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -109,6 +118,7 @@ CREATE TABLE `group_notice` (	-- 그룹 공지 사항
 	`group_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 아이디
 	`title` VARCHAR(128) NOT NULL,	-- 제목
 	`contents` TEXT,	-- 내용
+	-- 파일 추가
 	`view` INT(20) UNSIGNED,	-- 조회수
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
 	`modifyd` TIMESTAMP,	-- 수정 일시. 조회수를 사용하기에, 수정 시 date를 입력해야 함
@@ -154,6 +164,7 @@ CREATE TABLE `post` (	-- 게시물
     `title` VARCHAR(128) NOT NULL,	-- 제목
 	`contents` TEXT,	-- 내용
 	`type` VARCHAR(1), -- 0 전체 게시물, 1 그룹 게시물
+	-- 카테고리
 	`view` INT(20) UNSIGNED,	-- 조회수
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
 	`modifyd` TIMESTAMP,	-- 수정 일시. 조회수를 사용하기에, 수정 시 date를 입력해야 함
@@ -167,6 +178,7 @@ CREATE TABLE `post` (	-- 게시물
 
 CREATE TABLE `comment` (	-- 댓글
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	-- 대댓글만 가능
 	`user_id` INT(10) UNSIGNED NOT NULL,
 	`post_id` INT(10) UNSIGNED NOT NULL,
 	`contents` TEXT,	-- 내용
@@ -190,6 +202,8 @@ CREATE TABLE `post_like` (	-- 게시물 좋아요
     CONSTRAINT `fk_post_like_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_post_like_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 
 
 CREATE TABLE `files` (	-- 파일
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
