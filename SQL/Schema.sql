@@ -5,8 +5,6 @@
 USE sns;
 
 DROP TABLE IF EXISTS `files`;
-DROP TABLE IF EXISTS `category_permission`;
-DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `group_manager`;
 DROP TABLE IF EXISTS `group_member`;
 DROP TABLE IF EXISTS `group_notice`;
@@ -14,6 +12,8 @@ DROP TABLE IF EXISTS `post_like`;
 DROP TABLE IF EXISTS `view`;
 DROP TABLE IF EXISTS `comment`;
 DROP TABLE IF EXISTS `post`;
+DROP TABLE IF EXISTS `category_permission`;
+DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `qna`;
 DROP TABLE IF EXISTS `notice`;
 DROP TABLE IF EXISTS `group`;
@@ -121,13 +121,14 @@ CREATE TABLE `group_member` (	-- 그룹 멤버
 
 CREATE TABLE `group_manager` (	-- 그룹 관리자
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	-- 타입 분리 0 그룹장, 1 운영진
+	`type` VARCHAR(1), -- 0 그룹장, 1 운영진
 	`group_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 아이디
 	`group_member_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 멤버 아이디
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	
 	INDEX `index_group_manager_group_member_id` (`group_member_id`),
 	INDEX `index_group_manager_group_id` (`group_id`),
+	INDEX `index_group_manager_type` (`type`),
     CONSTRAINT `fk_group_manager_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_group_manager_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -199,7 +200,7 @@ CREATE TABLE `post` (	-- 게시물
 
 CREATE TABLE `comment` (	-- 댓글
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	`parent_id` INT(10) UNSIGNED,	-- 대댓그까지만 허용
+	`parent_id` INT(10) UNSIGNED,	-- 대댓글까지만 허용
 	`user_id` INT(10) UNSIGNED NOT NULL,
 	`post_id` INT(10) UNSIGNED NOT NULL,
 	`contents` TEXT,	-- 내용

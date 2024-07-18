@@ -334,7 +334,6 @@ public class FileServiceImpl implements FileService {
 				}	
 			}
 			
-			String showingFileName = file.getOriginalFilename();
 			String realFileName = file.getOriginalFilename();
 			if (realFileName == null || "".equals(realFileName)) {	// MultipartFile이 비정상인 경우
 				return null;
@@ -352,7 +351,6 @@ public class FileServiceImpl implements FileService {
 			if (returnValue) {	// 파일 저장 성공
 				fileVO = new FileVO();
 				fileVO.setName(realFileName);
-				fileVO.setShowName(showingFileName);
 
 				if (this.isImage(realFileName)) {	// 이미지이면 썸네일 생성
 					this.createThumbnailImage(filePath + File.separator + realFileName, "thumbnails");
