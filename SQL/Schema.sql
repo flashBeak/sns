@@ -5,6 +5,9 @@
 USE sns;
 
 DROP TABLE IF EXISTS `files`;
+DROP TABLE IF EXISTS `schedule_join`;
+DROP TABLE IF EXISTS `schedule`;
+DROP TABLE IF EXISTS `category_permission`;
 DROP TABLE IF EXISTS `group_manager`;
 DROP TABLE IF EXISTS `group_member`;
 DROP TABLE IF EXISTS `group_notice`;
@@ -12,7 +15,7 @@ DROP TABLE IF EXISTS `post_like`;
 DROP TABLE IF EXISTS `view`;
 DROP TABLE IF EXISTS `comment`;
 DROP TABLE IF EXISTS `post`;
-DROP TABLE IF EXISTS `category_permission`;
+DROP TABLE IF EXISTS `board`;
 DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `qna`;
 DROP TABLE IF EXISTS `notice`;
@@ -80,6 +83,7 @@ CREATE TABLE `group` (	-- 그룹
 	`lot` FLOAT,	-- 경도 x
 	`lat` FLOAT,	-- 위도 y
 	`phone` VARCHAR(20),	-- 전화번호
+	`approve_yn` CHAR(1) DEFAULT 'N',	-- 가입 승인 여부
 	`represent_image` VARCHAR(255),	-- 대표사진
 	`background_image` VARCHAR(255)	-- 배경사진
 
@@ -95,18 +99,6 @@ CREATE TABLE `category` (	-- 그룹 카테고리
 	CONSTRAINT `fk_category_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `category_permission` (	-- 카테고리 권한
-    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `user_id` INT(10) UNSIGNED NOT NULL,	-- 사용자 아이디
-	`category_id` INT(10) UNSIGNED NOT NULL,	--  카테괴 아이디
-	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	
-	INDEX `index_category_permission_user_id` (`user_id`),
-	INDEX `index_category_permission_category_id` (`category_id`),
-    CONSTRAINT `fk_category_permission_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-	CONSTRAINT `fk_category_permission_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE `group_member` (	-- 그룹 멤버
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `user_id` INT(10) UNSIGNED NOT NULL,	-- 사용자 아이디
@@ -119,11 +111,25 @@ CREATE TABLE `group_member` (	-- 그룹 멤버
 	CONSTRAINT `fk_group_member_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `category_permission` (	-- 카테고리 권한
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `group_member_id` INT(10) UNSIGNED NOT NULL,	-- 사용자 아이디
+	`category_id` INT(10) UNSIGNED NOT NULL,	--  카테고리 아이디
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	
+	INDEX `index_category_permission_group_member_id` (`group_member_id`),
+	INDEX `index_category_permission_category_id` (`category_id`),
+    CONSTRAINT `fk_category_permission_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `fk_category_permission_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `group_manager` (	-- 그룹 관리자
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
 	`type` VARCHAR(1), -- 0 그룹장, 1 운영진
 	`group_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 아이디
 	`group_member_id` INT(10) UNSIGNED NOT NULL,	-- 그룹 멤버 아이디
+	`update_yn` CHAR(1) DEFAULT 'N',	-- 게시물 수정 가능 여부
+	`remove_yn` CHAR(1) DEFAULT 'N',	-- 게시물 삭제 가능 여부
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	
 	INDEX `index_group_manager_group_member_id` (`group_member_id`),
@@ -177,24 +183,37 @@ CREATE TABLE `qna` (	-- QnA
 	CONSTRAINT `fk_qna_answer_id` FOREIGN KEY (`answer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `board` (	-- 게시물
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	`group_id` INT(10) UNSIGNED NOT NULL,
+	`category_id` INT(10) UNSIGNED NOT NULL,
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
+
+	INDEX `index_board_group_id` (`group_id`),
+	INDEX `index_board_category_id` (`category_id`),
+	CONSTRAINT `fk_board_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON UPDATE CASCADE,
+	CONSTRAINT `fk_board_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `post` (	-- 게시물
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	`user_id` INT(10) UNSIGNED NOT NULL,
+	`group_member_id` INT(10) UNSIGNED NOT NULL,
 	`group_id` INT(10) UNSIGNED NOT NULL,
-	`category_id` INT(10) UNSIGNED,
+	`board_id` INT(10) UNSIGNED NOT NULL,
     `title` VARCHAR(128) NOT NULL,	-- 제목
 	`contents` TEXT,	-- 내용
-	`type` VARCHAR(1), -- 0 전체 게시물, 1 그룹 게시물
+	`type` CHAR(1), -- 0 전체 게시물, 1 그룹 게시물
 	`view` INT(20) UNSIGNED,	-- 조회수
+	`order` INT(10) UNSIGNED,	-- 정렬 순서. 추후 개발 예정
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
 	`modifyd` TIMESTAMP,	-- 수정 일시. 조회수를 사용하기에, 수정 시 date를 입력해야 함
-
-    INDEX `index_post_user_id` (`user_id`),
+    
+    INDEX `index_post_group_member_id` (`group_member_id`),
 	INDEX `index_post_group_id` (`group_id`),
+	INDEX `index_post_board_id` (`board_id`),
 	INDEX `index_post_type` (`type`),
-	INDEX `index_post_category_id` (`category_id`),
-    CONSTRAINT `fk_post_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
-	CONSTRAINT `fk_post_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON UPDATE CASCADE,
+    CONSTRAINT `fk_post_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON UPDATE CASCADE,
+	CONSTRAINT `fk_post_board_id` FOREIGN KEY (`board_id`) REFERENCES `board` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_post_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -255,4 +274,37 @@ CREATE TABLE `files` (	-- 파일
 	CONSTRAINT `fk_files_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_files_group_notice_id` FOREIGN KEY (`group_notice_id`) REFERENCES `group_notice` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_files_notice_id` FOREIGN KEY (`notice_id`) REFERENCES `notice` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `schedule` (	-- 일정
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	`group_id` INT(10) UNSIGNED,	-- 그룹
+	`category_id` INT(10) UNSIGNED,	-- 카테고리 아이디. 없으면 전체
+	`status` CHAR(1) DEFAULT 0,	-- 0 모집중, 1 마감(조기 마감이 필요한 경우 사용)
+	`name` VARCHAR(128), -- 이름
+	`contents` VARCHAR(128), -- 내용
+	`startd` TIMESTAMP NOT NULL,	-- 시작 시간
+	`endd` TIMESTAMP NOT NULL,	-- 종료 시간
+	`repeat_yn` CHAR(1) DEFAULT 'N',	-- 반복 여부
+	`address` VARCHAR(255),
+	`address_detail` VARCHAR(255),
+	`count` INT(10) UNSIGNED,	-- 최대 인원수. 기본 그룹 멤버 수
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	
+	INDEX `index_schedule_group_id` (`group_id`),
+	INDEX `index_schedule_category_id` (`category_id`),
+    CONSTRAINT `fk_schedule_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `fk_schedule_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `schedule_join` (	-- 일정 참여
+    `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	`schedule_id` INT(10) UNSIGNED,
+	`group_member_id` INT(10) UNSIGNED,
+	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	
+	INDEX `index_schedule_join_schedule_id` (`schedule_id`),
+	INDEX `index_schedule_join_group_member_id` (`group_member_id`),
+    CONSTRAINT `fk_schedule_join_schedule_id` FOREIGN KEY (`schedule_id`) REFERENCES `schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `fk_schedule_join_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
