@@ -3,23 +3,17 @@ package com.model.post;
 public class PostVO {
 
 	private int id;
-	private int userId;
+	private int groupMemberId;
 	private int groupId;
-	private String categoryId;
-	private String title;
-	private String contents;
-	private String type;
+	private int boardId;
+	private String title;		// 제목
+	private String contents;	// 내용
+	private String type;		// 0 전체 게시물, 1 그룹 게시물
+	private int view;			// 조회수
+	private int order;			// 정렬 순서. 추후 개발 예정
 	private String created;
 	private String modifyd;
-
-	public String getCategoryId() {
-		return this.categoryId;
-	}
-
-	public void setCategoryId(String categoryId) {
-		this.categoryId = categoryId;
-	}
-
+	
 	public int getId() {
 		return this.id;
 	}
@@ -28,12 +22,12 @@ public class PostVO {
 		this.id = id;
 	}
 
-	public int getUserId() {
-		return this.userId;
+	public int getGroupMemberId() {
+		return this.groupMemberId;
 	}
 
-	public void setUserId(int userId) {
-		this.userId = userId;
+	public void setGroupMemberId(int groupMemberId) {
+		this.groupMemberId = groupMemberId;
 	}
 
 	public int getGroupId() {
@@ -42,6 +36,14 @@ public class PostVO {
 
 	public void setGroupId(int groupId) {
 		this.groupId = groupId;
+	}
+
+	public int getBoardId() {
+		return this.boardId;
+	}
+
+	public void setBoardId(int boardId) {
+		this.boardId = boardId;
 	}
 
 	public String getTitle() {
@@ -66,6 +68,22 @@ public class PostVO {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public int getView() {
+		return this.view;
+	}
+
+	public void setView(int view) {
+		this.view = view;
+	}
+
+	public int getOrder() {
+		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	public String getCreated() {

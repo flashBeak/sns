@@ -17,6 +17,8 @@ public class UserVO {
 	private String fullName;
 	private String nickName;
 	private String picture;
+	private String gender;			// 0 남자, 1 여자
+	private String birthd;			// 생년 월일 ex) 1990-01-01
 	private boolean removePicture;	// 수정 시, 이미지 삭제 여부
 	private boolean fcmNotice;		// 공지 알림 수신 여부
 	private String naverId;
@@ -24,8 +26,6 @@ public class UserVO {
 	private String appleId;
 	private String agreePrivacy3party;	// 개인정보 제3자 제공 동의 여부 0, 1
 	private String agreeMarketing;	// 마케팅 정보 메일, SMS 수신동의 여부 0, 1
-	private String gender;			// 0 남자, 1 여자
-	private String birthd;			// 생년 월일 ex) 1990-01-01
 	private String address;			// 주소
 	private String addressDetail;	// 상세주소
 

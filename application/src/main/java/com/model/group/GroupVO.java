@@ -13,9 +13,18 @@ public class GroupVO {
 	private String lat;				// 위도 y
 	private String phone;			// 전화번호
 	private String representImage;	// 대표사진
+	private String approveYn;		// 승인여부
 	private boolean removeRepresentImage;
 	private String backgroundmage;	// 배경사진
 	private boolean removeBackgroundmage;
+
+	public String getApproveYn() {
+		return this.approveYn;
+	}
+
+	public void setApproveYn(String approveYn) {
+		this.approveYn = approveYn;
+	}
 
 	public int getId() {
 		return this.id;
