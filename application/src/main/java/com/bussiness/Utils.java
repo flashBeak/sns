@@ -17,15 +17,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
-
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Hex;
@@ -434,20 +431,6 @@ public class Utils {
 		String newDate = simpleDateFormat.format(calendarDate.getTime());
 		return newDate;
 	}
-	
-	// 키값기준 정렬 - 기본 내림차순
-	public static Map <String, Object> orderByKey(final Map<String, ?> sourceMap, int sortType) {	// sortType 0 asc, 1 desc
-
-		Map <String, Object> treeMap = null;
-		if (sortType == 0 )
-			treeMap = new TreeMap<String, Object>();
-		else
-			treeMap = new TreeMap<String, Object>(Collections.reverseOrder());
-		
-		treeMap.putAll(sourceMap);
-		
-        return treeMap;
-    }
 	
 	// 시간 차이 계산
 	public static int getDiffTime(int type, String dateStr1, String dateStr2, String dateFormatStr) {

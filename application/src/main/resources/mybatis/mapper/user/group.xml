@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="GroupDAO">
+
+	<select id="selectList" resultType="com.model.GroupVO">
+ 		SELECT
+			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
+			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
+		FROM groups u
+		JOIN group_profiles up ON u.id = up.group_id
+		ORDER BY u.id DESC
+	</select>
+
+	<select id="selectListTotalCount" resultType="int">
+ 		SELECT
+			COUNT(*) AS count
+		FROM groups u
+		JOIN group_profiles up ON u.id = up.group_id
+	</select>
+
+	<select id="select" parameterType="String" resultType="com.model.GroupVO">
+		SELECT
+			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
+			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
+		FROM groups u
+		JOIN group_profiles up ON u.id = up.group_id
+		WHERE u.removed = 0
+			AND u.id = #{id}
+	</select>
+
+	<select id="selectByLoginTypeSocialId" parameterType="String" resultType="com.model.GroupVO">
+		SELECT
+			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
+			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
+		FROM groups u
+		JOIN group_profiles up ON u.id = up.group_id
+		WHERE u.removed = 0
+		<choose>
+			<when test="type == '0'">
+				AND u.naver_id = #{socialId}
+			</when>
+			<when test="type == '1'">
+				AND u.kakao_id = #{socialId}
+			</when>
+			<when test="type == '2'">
+				AND u.apple_id = #{socialId}
+			</when>
+		</choose>
+	</select>
+
+	<insert id="insert" parameterType="com.model.GroupVO">
+		INSERT INTO groups (
+			password, phone
+		<if test="naverId != null and naverId != ''">
+			, naver_id
+		</if>
+		<if test="kakaoId != null and kakaoId != ''">
+			, kakao_id
+		</if>
+		<if test="appleId != null and appleId != ''">
+			, apple_id
+		</if>
+		) VALUES (
+			#{password}, #{phone}
+		<if test="naverId != null and naverId != ''">
+			, #{naverId}
+		</if>
+		<if test="kakaoId != null and kakaoId != ''">
+			, #{kakaoId}
+		</if>
+		<if test="appleId != null and appleId != ''">
+			, #{appleId}
+		</if>
+		)
+			
+		<selectKey keyProperty="id" resultType="String">
+        	SELECT LAST_INSERT_ID()
+  		</selectKey>
+	</insert>
+
+	<insert id="insertInfo" parameterType="com.model.GroupVO">
+		INSERT INTO group_profiles (
+			group_id, full_name, nick_name, gender, birthd
+		<if test="picture != null and picture != ''">
+			, picture
+		</if>
+		<if test="fcmNotice != null and fcmNotice != ''">
+			, fcm_notice
+		</if>
+		<if test="fcmGroupNotice != null and fcmGroupNotice != ''">
+			, fcm_group_notice
+		</if>
+		<if test="address != null and address != ''">
+			, address
+		</if>
+		<if test="addressDetail != null and addressDetail != ''">
+			, address_detail
+		</if>
+		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
+			, agree_privacy_3party
+		</if>
+		) VALUES (
+			#{id}, #{fullName}, #{nickName}, #{gender}, #{birthd}
+		<if test="picture != null and picture != ''">
+			, #{picture}
+		</if>
+		<if test="fcmNotice != null and fcmNotice != ''">
+			, #{fcmNotice}
+		</if>
+		<if test="fcmGroupNotice != null and fcmGroupNotice != ''">
+			, #{fcmGroupNotice}
+		</if>
+		<if test="address != null and address != ''">
+			, #{address}
+		</if>
+		<if test="addressDetail != null and addressDetail != ''">
+			, #{addressDetail}
+		</if>
+		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
+			, #{agreePrivacy3Party}
+		</if>
+		)
+	</insert>
+
+	<update id="update" parameterType="com.model.GroupVO">
+		UPDATE groups SET
+			phone = #{phone}
+		<if test="role != null">
+			, role = #{role}
+		</if>
+		<if test="status != null">
+			, status = #{status}
+		</if>
+		<if test="newPassword != null">
+			, password = #{newPassword}
+		</if>
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateInfo" parameterType="com.model.GroupVO">
+		UPDATE group_profiles SET
+			group_id = #{id},
+			full_name = #{fullNaem}
+		<if test="gender != null">
+			, gender = #{gender}
+		</if>
+		<if test="nickName != null">
+			, nick_name = #{nickName}
+		</if>
+		<if test="picture != null">
+			, picture = #{picture}
+		</if>
+		<if test="birthd != null">
+			, birthd = #{birthd}
+		</if>
+		<if test="agreePrivacy3Party != null">
+			, agree_privacy_3party =  #{agreePrivacy3Party}
+		</if>
+		<if test="fcmNotice != null">
+			, fcm_notice = #{fcmNotice}
+		</if>
+		<if test="fcmGroupNotice != null">
+			, fcm_group_notice = #{fcmGroupNotice}
+		</if>
+		<if test="address != null">
+			, address = #{address}
+		</if>
+		<if test="addressDetail != null">
+			, address_detail = #{addressDetail}
+		</if>
+
+		WHERE group_id = #{id}
+	</update>
+
+	<update id="delete" parameterType="String">
+		UPDATE groups SET
+			removed = 1,
+			removed_time = NOW()
+		WHERE id = #{id}
+	</update>
+</mapper>

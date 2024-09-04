@@ -9,7 +9,7 @@ public class GroupVO {
 	private String addressDetail;	// 상세주소
 	private String introduce;		// 소개
 	private String etc;				// 기타
-	private String lot;				// 경도 x
+	private String lon;				// 경도 x
 	private String lat;				// 위도 y
 	private String phone;			// 전화번호
 	private String representImage;	// 대표사진
@@ -17,7 +17,7 @@ public class GroupVO {
 	private boolean removeRepresentImage;
 	private String backgroundmage;	// 배경사진
 	private boolean removeBackgroundmage;
-
+	
 	public String getApproveYn() {
 		return this.approveYn;
 	}
@@ -74,12 +74,12 @@ public class GroupVO {
 		this.etc = etc;
 	}
 
-	public String getLot() {
-		return this.lot;
+	public String getLon() {
+		return this.lon;
 	}
 
-	public void setLot(String lot) {
-		this.lot = lot;
+	public void setLon(String lon) {
+		this.lon = lon;
 	}
 
 	public String getLat() {

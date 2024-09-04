@@ -5,6 +5,7 @@ public class UserVO {
 	public static int USER_ROLE_ADMIN = 9;
 
     private String id;
+	private String userId;
     private String username;
     private String password;
     private String newPassword;
@@ -21,13 +22,39 @@ public class UserVO {
 	private String birthd;			// 생년 월일 ex) 1990-01-01
 	private boolean removePicture;	// 수정 시, 이미지 삭제 여부
 	private boolean fcmNotice;		// 공지 알림 수신 여부
+	private String loginType;
 	private String naverId;
 	private String kakaoId;
 	private String appleId;
+	private String socialId;
 	private String agreePrivacy3party;	// 개인정보 제3자 제공 동의 여부 0, 1
 	private String agreeMarketing;	// 마케팅 정보 메일, SMS 수신동의 여부 0, 1
 	private String address;			// 주소
 	private String addressDetail;	// 상세주소
+
+	public String getLoginType() {
+		return this.loginType;
+	}
+
+	public void setLoginType(String loginType) {
+		this.loginType = loginType;
+	}
+
+	public String getSocialId() {
+		return this.socialId;
+	}
+
+	public void setSocialId(String socialId) {
+		this.socialId = socialId;
+	}
+
+	public String getUserId() {
+		return this.userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
 	public String getPhone() {
 		return this.phone;

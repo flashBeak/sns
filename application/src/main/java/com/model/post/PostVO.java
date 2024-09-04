@@ -8,12 +8,20 @@ public class PostVO {
 	private int boardId;
 	private String title;		// 제목
 	private String contents;	// 내용
-	private String type;		// 0 전체 게시물, 1 그룹 게시물
+	private String viewType;	// 게시물 표시 유형. 0 일반 조회, 1 카테고리 소속만 조회
 	private int view;			// 조회수
 	private int order;			// 정렬 순서. 추후 개발 예정
 	private String created;
 	private String modifyd;
 	
+	public String getViewType() {
+		return this.viewType;
+	}
+
+	public void setViewType(String viewType) {
+		this.viewType = viewType;
+	}
+
 	public int getId() {
 		return this.id;
 	}
@@ -60,14 +68,6 @@ public class PostVO {
 
 	public void setContents(String contents) {
 		this.contents = contents;
-	}
-
-	public String getType() {
-		return this.type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public int getView() {

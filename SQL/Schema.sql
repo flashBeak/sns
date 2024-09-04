@@ -186,7 +186,8 @@ CREATE TABLE `qna` (	-- QnA
 CREATE TABLE `board` (	-- 게시물
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
 	`group_id` INT(10) UNSIGNED NOT NULL,
-	`category_id` INT(10) UNSIGNED NOT NULL,
+	`type` CHAR(1) DEFAULT '0',	-- 0 전체 게시판, 1 그룹 게시판
+	`category_id` INT(10) UNSIGNED,
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
 
 	INDEX `index_board_group_id` (`group_id`),
@@ -202,7 +203,7 @@ CREATE TABLE `post` (	-- 게시물
 	`board_id` INT(10) UNSIGNED NOT NULL,
     `title` VARCHAR(128) NOT NULL,	-- 제목
 	`contents` TEXT,	-- 내용
-	`type` CHAR(1), -- 0 전체 게시물, 1 그룹 게시물
+	`view_type` CHAR(1) DEFAULT '0',	-- 게시물 표시 유형 0 일반 조회, 1 카테고리 소속만 조회
 	`view` INT(20) UNSIGNED,	-- 조회수
 	`order` INT(10) UNSIGNED,	-- 정렬 순서. 추후 개발 예정
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,	-- 생성 일시
@@ -278,7 +279,7 @@ CREATE TABLE `files` (	-- 파일
 
 CREATE TABLE `schedule` (	-- 일정
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	`group_id` INT(10) UNSIGNED,	-- 그룹
+	`group_id` INT(10) UNSIGNED NOT NULL,	-- 그룹
 	`category_id` INT(10) UNSIGNED,	-- 카테고리 아이디. 없으면 전체
 	`status` CHAR(1) DEFAULT 0,	-- 0 모집중, 1 마감(조기 마감이 필요한 경우 사용)
 	`name` VARCHAR(128), -- 이름
@@ -299,8 +300,8 @@ CREATE TABLE `schedule` (	-- 일정
 
 CREATE TABLE `schedule_join` (	-- 일정 참여
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	`schedule_id` INT(10) UNSIGNED,
-	`group_member_id` INT(10) UNSIGNED,
+	`schedule_id` INT(10) UNSIGNED NOT NULL,
+	`group_member_id` INT(10) UNSIGNED NOT NULL,
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	
 	INDEX `index_schedule_join_schedule_id` (`schedule_id`),

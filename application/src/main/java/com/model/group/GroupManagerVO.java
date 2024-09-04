@@ -3,6 +3,9 @@ package com.model.group;
 // 그룹 멤버
 public class GroupManagerVO {
 
+	public static final String TYPE_MASTER = "0";	// 그룹장
+	public static final String TYPE_MANAGER = "1";	// 운영진
+
 	private int id;
 	private int groupId;
 	private int groupMemberId;

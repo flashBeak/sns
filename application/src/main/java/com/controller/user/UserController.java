@@ -1,7 +1,6 @@
 package com.controller.user;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,21 +20,17 @@ import com.bussiness.TransactionManager;
 import com.bussiness.Utils;
 import com.model.Constants;
 import com.model.UserVO;
-import com.service.auth.AdminAuthService;
 import com.service.common.FileService;
-import com.service.user.AdminUserService;
+import com.service.user.UserService;
 
 import jakarta.annotation.Resource;
 
 @Controller
-@RequestMapping(value = "/admin/user")
-public class AdminUserController {
+@RequestMapping(value = "/user")
+public class UserController {
 
-    @Resource(name = "AdminUserService")
-	AdminUserService userService;
-
-	@Resource(name = "AdminAuthService")
-	AdminAuthService authService;
+    @Resource(name = "UserService")
+	UserService userService;
 
 	@Resource(name = "txManager")
 	protected DataSourceTransactionManager txManager;
@@ -45,36 +40,19 @@ public class AdminUserController {
 
 	final String FILE_PATH = "/user";
 
-    /**
-	 * 사용자 목록 가져오기
-	 * @return map
-	 */
-    @GetMapping("/list")
-	public @ResponseBody Map<String, Object> list(HttpServletRequest request) throws Exception {
-
-		Map<String, Object> returnMap = new HashMap<String, Object>();
-		
-		// 목록 가져오기
-		List<UserVO> list = userService.getList();
-		int totalCount = userService.getListTotalCount();
-
-        returnMap.put("list", list);
-        returnMap.put("totalCount", totalCount);
-
-		return returnMap;
-	}
-
-    /**
-	 * 정보 가져오기
+	/**
+	 * 내 정보 가져오기
 	 * @param id
 	 * @return map
 	 */
 	@GetMapping("/get")
-    public @ResponseBody Map<String, Object> get(String id) throws Exception {
+    public @ResponseBody Map<String, Object> get(HttpServletRequest request) throws Exception {
 
     	Map<String, Object> returnMap = new HashMap<String, Object>();
+
+		String userId = (String) request.getSession().getAttribute("userId");
     	
-    	UserVO item = userService.get(id);
+    	UserVO item = userService.get(userId);
 		if (item == null) {
 			returnMap.put("code", Constants.RESULT_CODE_NO_ITEM);
 			returnMap.put("message", Constants.RESULT_MSG_NO_ITEM);
@@ -89,29 +67,28 @@ public class AdminUserController {
     }
 
 	/**
-	 *  추가
-	 * @param phone				전화번호
+	 * 회원가입
 	 * @param naver_id			네이버 아이디
 	 * @param kakao_id			카카오 아이디
 	 * @param apple_id			애플 아이디
-	 * @param password			비밀번호
 	 * @param gender			0 남자, 1 여자
-	 * @param full_name			이름
-	 * @param nick_name			별명
+	 * @param phone				전화번호
+	 * @param fullName			이름
+	 * @param nickName			별명
 	 * @param address			주소
 	 * @param address_detail	상세 주소
-	 * @param picture			프로필 이미지
+	 * @param addPicture		프로필 이미지
 	 * @param birthd			생년월일
 	 * @return map
 	 * @exception Exception
 	 */
-    @PostMapping("/add")
+    @PostMapping("/signup")
     public @ResponseBody Map<String, Object> add(final MultipartHttpServletRequest multiRequest, HttpServletRequest request,
     		@ModelAttribute("UserVO") UserVO userVO) throws Exception {
 
     	Map<String, Object> returnMap = new HashMap<String, Object>();
 		
-		String [] params = {"fullName", "phone", "gender", "address", "birthd", "password", "role"};
+		String [] params = {"fullName", "phone", "gender", "address", "birthd"};
 		ParamResult paramResult = ParamResult.valid(request, params);	// 필수인자 확인
 		if (paramResult.code != Constants.RESULT_CODE_SUCCESS) {
 			returnMap.put("code", paramResult.code);
@@ -119,16 +96,12 @@ public class AdminUserController {
 			return returnMap;
 		}
 
-		// 비밀번호 암호화
-		String encryptedPassword = Utils.encodeSHA256(userVO.getPassword());
-		userVO.setPassword(encryptedPassword);
-		
 		// 트랜잭션 설정
 		TransactionStatus txStatus = TransactionManager.start(txManager);
 
 		try {
 			// 사용자 통장사본 파일 업데이트 확인
-			Map<String, Object> resultMapPicture = fileService.add(multiRequest, FILE_PATH, "picture");
+			Map<String, Object> resultMapPicture = fileService.add(multiRequest, FILE_PATH, "addPicture");
 			if (!resultMapPicture.get("code").equals(Constants.RESULT_CODE_SUCCESS)) {
 				TransactionManager.rollback(txStatus);	// 트랜잭션 롤백
 
@@ -250,42 +223,34 @@ public class AdminUserController {
     }
 	
 	/**
-	 * 사용자 삭제
-	 * @param id
+	 * 회원탈퇴
 	 * @return map
 	 */
     @PostMapping("/remove")
-    public @ResponseBody Map<String, Object> remove(HttpServletRequest request,
-		@ModelAttribute("UserVO") UserVO userVO) throws Exception {
+    public @ResponseBody Map<String, Object> remove(HttpServletRequest request, @ModelAttribute("UserVO") UserVO userVO) throws Exception {
 
 		Map<String, Object> returnMap = new HashMap<String, Object>();
-		
-		String [] params = {"id"};
-		ParamResult paramResult = ParamResult.valid(request, params);	// 필수인자 확인
-		if (paramResult.code != Constants.RESULT_CODE_SUCCESS) {
-			returnMap.put("code", paramResult.code);
-			returnMap.put("message", paramResult.message);
-			return returnMap;
-		}
+
+		String userId = (String) request.getSession().getAttribute("userId");
 
 		// 기존 아이템 정보 가져오기
-		UserVO item = userService.get(userVO.getId());
-		if (item == null) {
-			returnMap.put("code", Constants.RESULT_CODE_NO_ITEM);
-			returnMap.put("message", Constants.RESULT_MSG_NO_ITEM);
+		UserVO item = userService.get(userId);
+		if (item == null) {	// 이미 탈퇴된 경우
+			returnMap.put("code", Constants.RESULT_CODE_ALREADY_REMOVED_USER);
+			returnMap.put("message", Constants.RESULT_MSG_ALREADY_REMOVED_USER);
 			return returnMap;
 		}
 
 		// 정보 수정
-		int result = userService.remove(userVO.getId());
-		if (result > 0) {
-			returnMap.put("code", Constants.RESULT_CODE_SUCCESS);
-			returnMap.put("message", Constants.RESULT_MSG_SUCCESS);
-		} else {
+		int result = userService.remove(userId);
+		if (result <= 0) {
 			returnMap.put("code", Constants.RESULT_CODE_FAIL_TO_DELETE);
 			returnMap.put("message", Constants.RESULT_MSG_FAIL_TO_DELETE);
+			return returnMap;
 		}
-
+		
+		returnMap.put("code", Constants.RESULT_CODE_SUCCESS);
+		returnMap.put("message", Constants.RESULT_MSG_SUCCESS);
 		return returnMap;
     }
 }

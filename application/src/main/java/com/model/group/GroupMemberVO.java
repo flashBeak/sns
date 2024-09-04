@@ -5,7 +5,7 @@ public class GroupMemberVO {
 
 	private int id;
 	private int groupId;
-	private int userId;
+	private String userId;
 	private String phone;		// 전화번호
 	private String fullName;	// 이름
 	private String nickName;	// 닉네임
@@ -30,11 +30,11 @@ public class GroupMemberVO {
 		this.groupId = groupId;
 	}
 
-	public int getUserId() {
+	public String getUserId() {
 		return this.userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 
