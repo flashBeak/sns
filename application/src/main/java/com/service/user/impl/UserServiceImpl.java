@@ -15,7 +15,7 @@ import jakarta.annotation.Resource;
 @Service("UserService")
 public class UserServiceImpl implements UserService {
 
-	@Resource(name="AdminUserDAO")
+	@Resource(name="UserDAO")
     private UserDAO dao;
 
 	@Override

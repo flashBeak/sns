@@ -16,7 +16,25 @@ public class GroupManagerVO {
 	private String picture;		// 프로필
 	private String gender;		// 성별
 	private String birthd;		// 생년월일
+	private String updateYn;	// 게시물 수정 가능 여부
+	private String removeYn;	// 게시물 삭제 가능 여부
 	private String created;
+
+	public String getUpdateYn() {
+		return this.updateYn;
+	}
+
+	public void setUpdateYn(String updateYn) {
+		this.updateYn = updateYn;
+	}
+
+	public String getRemoveYn() {
+		return this.removeYn;
+	}
+
+	public void setRemoveYn(String removeYn) {
+		this.removeYn = removeYn;
+	}
 
 	public int getGroupMemberId() {
 		return this.groupMemberId;

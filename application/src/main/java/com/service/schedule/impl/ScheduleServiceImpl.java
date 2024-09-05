@@ -13,7 +13,7 @@ import jakarta.annotation.Resource;
 @Service("ScheduleService")
 public class ScheduleServiceImpl implements ScheduleService {
 
-	@Resource(name="AdminScheduleDAO")
+	@Resource(name="ScheduleDAO")
     private ScheduleDAO dao;
 
 	@Override

@@ -14,31 +14,31 @@ public class ScheduleDAO {
 	protected SqlSessionTemplate sqlSession;
 
 	public List<ScheduleVO> getList() {
-		return sqlSession.selectList("AdminScheduleDAO.selectList");
+		return sqlSession.selectList("ScheduleDAO.selectList");
 	}
 
 	public int getListTotalCount() {
-		return sqlSession.selectOne("AdminScheduleDAO.selectListTotalCount");
+		return sqlSession.selectOne("ScheduleDAO.selectListTotalCount");
 	}
     
 	public ScheduleVO get(int id) throws Exception {
-		return sqlSession.selectOne("AdminScheduleDAO.select", id);
+		return sqlSession.selectOne("ScheduleDAO.select", id);
     }
 
 	public int add(ScheduleVO item) throws Exception {
-		return sqlSession.insert("AdminScheduleDAO.insert", item);
+		return sqlSession.insert("ScheduleDAO.insert", item);
     }
 
 	public int addInfo(ScheduleVO item) throws Exception {
-		return sqlSession.insert("AdminScheduleDAO.insertInfo", item);
+		return sqlSession.insert("ScheduleDAO.insertInfo", item);
     }
 
 	public int update(ScheduleVO item) throws Exception {
-		return sqlSession.update("AdminScheduleDAO.update", item);
+		return sqlSession.update("ScheduleDAO.update", item);
     }
 
 	public int remove(int id) throws Exception {
-		return sqlSession.delete("AdminScheduleDAO.delete", id);
+		return sqlSession.delete("ScheduleDAO.delete", id);
     }
 }
 

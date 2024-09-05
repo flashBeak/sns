@@ -10,7 +10,7 @@ import com.service.user.impl.AdminUserDAO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 
-@Service("AdminUserService")
+@Service("AdminAuthService")
 public class AdminAuthServiceImpl implements AdminAuthService {
 
 	@Resource(name="AdminUserDAO")

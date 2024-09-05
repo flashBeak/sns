@@ -22,15 +22,24 @@ public class UserVO {
 	private String birthd;			// 생년 월일 ex) 1990-01-01
 	private boolean removePicture;	// 수정 시, 이미지 삭제 여부
 	private boolean fcmNotice;		// 공지 알림 수신 여부
+	private boolean fcmGroupNotice;
 	private String loginType;
 	private String naverId;
 	private String kakaoId;
 	private String appleId;
 	private String socialId;
-	private String agreePrivacy3party;	// 개인정보 제3자 제공 동의 여부 0, 1
+	private String agreePrivacy3Party;	// 개인정보 제3자 제공 동의 여부 0, 1
 	private String agreeMarketing;	// 마케팅 정보 메일, SMS 수신동의 여부 0, 1
 	private String address;			// 주소
 	private String addressDetail;	// 상세주소
+	
+	public boolean isFcmGroupNotice() {
+		return this.fcmGroupNotice;
+	}
+
+	public void setFcmGroupNotice(boolean fcmGroupNotice) {
+		this.fcmGroupNotice = fcmGroupNotice;
+	}
 
 	public String getLoginType() {
 		return this.loginType;
@@ -128,12 +137,12 @@ public class UserVO {
 		this.appleId = appleId;
 	}
 
-	public String getAgreePrivacy3party() {
-		return this.agreePrivacy3party;
+	public String getAgreePrivacy3Party() {
+		return this.agreePrivacy3Party;
 	}
 
-	public void setAgreePrivacy3party(String agreePrivacy3party) {
-		this.agreePrivacy3party = agreePrivacy3party;
+	public void setAgreePrivacy3Party(String agreePrivacy3Party) {
+		this.agreePrivacy3Party = agreePrivacy3Party;
 	}
 
 	public String getAgreeMarketing() {

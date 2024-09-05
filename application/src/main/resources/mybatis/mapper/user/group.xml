@@ -3,180 +3,189 @@
 
 <mapper namespace="GroupDAO">
 
-	<select id="selectList" resultType="com.model.GroupVO">
- 		SELECT
-			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
-			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
-		FROM groups u
-		JOIN group_profiles up ON u.id = up.group_id
-		ORDER BY u.id DESC
+	<select id="selectList" resultType="com.model.group.GroupVO">
+ 		SELECT *
+		FROM `group`
+		ORDER BY id DESC
 	</select>
 
 	<select id="selectListTotalCount" resultType="int">
  		SELECT
 			COUNT(*) AS count
-		FROM groups u
-		JOIN group_profiles up ON u.id = up.group_id
+		FROM `group`
 	</select>
 
-	<select id="select" parameterType="String" resultType="com.model.GroupVO">
-		SELECT
-			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
-			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
-		FROM groups u
-		JOIN group_profiles up ON u.id = up.group_id
-		WHERE u.removed = 0
-			AND u.id = #{id}
+	<select id="selectListByUserId" resultType="com.model.group.GroupVO">
+ 		SELECT g.*
+		FROM `group` g
+		JOIN group_member gm ON gm.group_id = g.id
+		WHERE gm.user_id = #{userId}
+		ORDER BY g.id DESC
 	</select>
 
-	<select id="selectByLoginTypeSocialId" parameterType="String" resultType="com.model.GroupVO">
-		SELECT
-			u.*, up.gender, up.full_name, up.nick_name, up.address, up.address_detail, up.picture,
-			up.birthd, up.agree_privacy_3party, up.agree_marketing, up.fcm_notice, up.fcm_group_notice
-		FROM groups u
-		JOIN group_profiles up ON u.id = up.group_id
-		WHERE u.removed = 0
-		<choose>
-			<when test="type == '0'">
-				AND u.naver_id = #{socialId}
-			</when>
-			<when test="type == '1'">
-				AND u.kakao_id = #{socialId}
-			</when>
-			<when test="type == '2'">
-				AND u.apple_id = #{socialId}
-			</when>
-		</choose>
+	<select id="selectListTotalCountByUserId" resultType="int">
+ 		SELECT
+			COUNT(*) AS count
+		FROM `group`
+		WHERE gm.user_id = #{userId}
 	</select>
 
-	<insert id="insert" parameterType="com.model.GroupVO">
-		INSERT INTO groups (
-			password, phone
-		<if test="naverId != null and naverId != ''">
-			, naver_id
+	<select id="select" parameterType="int" resultType="com.model.group.GroupVO">
+		SELECT *
+		FROM `group`
+		WHERE id = #{id}
+	</select>
+
+	<insert id="insert" parameterType="com.model.group.GroupVO">
+		INSERT INTO `group` (
+			name, address, approve_yn
+		<if test="addressDetail != null and addressDetail != ''">
+			, address_detail
 		</if>
-		<if test="kakaoId != null and kakaoId != ''">
-			, kakao_id
+		<if test="introduce != null and introduce != ''">
+			, introduce
 		</if>
-		<if test="appleId != null and appleId != ''">
-			, apple_id
+		<if test="etc != null and etc != ''">
+			, etc
+		</if>
+		<if test="lon != null and lon != ''">
+			, lon
+		</if>
+		<if test="lat != null and lat != ''">
+			, lat
+		</if>
+		<if test="phone != null and phone != ''">
+			, phone
+		</if>
+		<if test="representImage != null and representImage != ''">
+			, represent_image
+		</if>
+		<if test="backgroundImage != null and backgroundImage != ''">
+			, background_image
 		</if>
 		) VALUES (
-			#{password}, #{phone}
-		<if test="naverId != null and naverId != ''">
-			, #{naverId}
+			#{name}, #{address}, #{approveYn}
+		<if test="addressDetail != null and addressDetail != ''">
+			, #{addressDetail}
 		</if>
-		<if test="kakaoId != null and kakaoId != ''">
-			, #{kakaoId}
+		<if test="introduce != null and introduce != ''">
+			, #{introduce}
 		</if>
-		<if test="appleId != null and appleId != ''">
-			, #{appleId}
+		<if test="etc != null and etc != ''">
+			, #{etc}
+		</if>
+		<if test="lon != null and lon != ''">
+			, #{lon}
+		</if>
+		<if test="lat != null and lat != ''">
+			, #{lat}
+		</if>
+		<if test="phone != null and phone != ''">
+			, #{phone}
+		</if>
+		<if test="representImage != null and representImage != ''">
+			, #{representImage}
+		</if>
+		<if test="backgroundImage != null and backgroundImage != ''">
+			, #{backgroundImage}
 		</if>
 		)
 			
-		<selectKey keyProperty="id" resultType="String">
+		<selectKey keyProperty="id" resultType="int">
+        	SELECT LAST_INSERT_ID()
+  		</selectKey>
+	</insert>
+	
+	<update id="update" parameterType="com.model.group.GroupVO">
+		UPDATE `group` SET
+			id = #{id}
+		<if test="name != null and name != ''">
+			, name = #{name}
+		</if>
+		<if test="address != null and address != ''">
+			, address = #{address}
+		</if>
+		<if test="approveYn != null and approveYn != ''">
+			, approveYn = #{approveYn}
+		</if>
+		<if test="addressDetail != null and addressDetail != ''">
+			, address_detail = #{addressDetail}
+		</if>
+		<if test="introduce != null and introduce != ''">
+			, introduce = #{introduce}
+		</if>
+		<if test="etc != null and etc != ''">
+			, etc = #{etc}
+		</if>
+		<if test="lon != null and lon != ''">
+			, lon = #{lon}
+		</if>
+		<if test="lat != null and lat != ''">
+			, lat = #{lat}
+		</if>
+		<if test="phone != null and phone != ''">
+			, phone = #{phone}
+		</if>
+		<if test="representImage != null and representImage != ''">
+			, represent_image = #{representImage}
+		</if>
+		<if test="backgroundImage != null and backgroundImage != ''">
+			, background_image = #{backgroundImage}
+		</if>
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete" parameterType="int">
+		DELETE FROM `group`
+		WHERE id = #{id}
+	</update>
+
+	<select id="selectMemberByUserId" parameterType="java.util.Map" resultType="com.model.group.GroupMemberVO">
+		SELECT *
+		FROM group_member
+		WHERE group_id = #{id}
+			AND user_id = #{userId}
+	</select>
+
+	<insert id="insertMember" parameterType="com.model.group.GroupMemberVO">
+		INSERT INTO group_member (
+			user_id, group_id
+		) VALUES (
+			#{userId}, #{groupId}
+		)
+			
+		<selectKey keyProperty="id" resultType="int">
         	SELECT LAST_INSERT_ID()
   		</selectKey>
 	</insert>
 
-	<insert id="insertInfo" parameterType="com.model.GroupVO">
-		INSERT INTO group_profiles (
-			group_id, full_name, nick_name, gender, birthd
-		<if test="picture != null and picture != ''">
-			, picture
+	<select id="selectManager" parameterType="int" resultType="com.model.group.GroupManagerVO">
+		SELECT *
+		FROM group_manager
+		WHERE group_member_id = #{groupMemberId}
+	</select>
+
+	<insert id="insertManager" parameterType="com.model.group.GroupManagerVO">
+		INSERT INTO group_manager (
+			type, group_id, group_member_id
+		<if test="updateYn != null and updateYn != ''">
+			, update_yn
 		</if>
-		<if test="fcmNotice != null and fcmNotice != ''">
-			, fcm_notice
-		</if>
-		<if test="fcmGroupNotice != null and fcmGroupNotice != ''">
-			, fcm_group_notice
-		</if>
-		<if test="address != null and address != ''">
-			, address
-		</if>
-		<if test="addressDetail != null and addressDetail != ''">
-			, address_detail
-		</if>
-		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
-			, agree_privacy_3party
+		<if test="removeYn != null and removeYn != ''">
+			, remove_yn
 		</if>
 		) VALUES (
-			#{id}, #{fullName}, #{nickName}, #{gender}, #{birthd}
-		<if test="picture != null and picture != ''">
-			, #{picture}
+			#{type}, #{groupId}, #{groupMemberId}
+		<if test="updateYn != null and updateYn != ''">
+			, #{updateYn}
 		</if>
-		<if test="fcmNotice != null and fcmNotice != ''">
-			, #{fcmNotice}
-		</if>
-		<if test="fcmGroupNotice != null and fcmGroupNotice != ''">
-			, #{fcmGroupNotice}
-		</if>
-		<if test="address != null and address != ''">
-			, #{address}
-		</if>
-		<if test="addressDetail != null and addressDetail != ''">
-			, #{addressDetail}
-		</if>
-		<if test="agreePrivacy3Party != null and agreePrivacy3Party != ''">
-			, #{agreePrivacy3Party}
+		<if test="removeYn != null and removeYn != ''">
+			, #{removeYn}
 		</if>
 		)
+			
+		<selectKey keyProperty="id" resultType="int">
+        	SELECT LAST_INSERT_ID()
+  		</selectKey>
 	</insert>
-
-	<update id="update" parameterType="com.model.GroupVO">
-		UPDATE groups SET
-			phone = #{phone}
-		<if test="role != null">
-			, role = #{role}
-		</if>
-		<if test="status != null">
-			, status = #{status}
-		</if>
-		<if test="newPassword != null">
-			, password = #{newPassword}
-		</if>
-		WHERE id = #{id}
-	</update>
-	
-	<update id="updateInfo" parameterType="com.model.GroupVO">
-		UPDATE group_profiles SET
-			group_id = #{id},
-			full_name = #{fullNaem}
-		<if test="gender != null">
-			, gender = #{gender}
-		</if>
-		<if test="nickName != null">
-			, nick_name = #{nickName}
-		</if>
-		<if test="picture != null">
-			, picture = #{picture}
-		</if>
-		<if test="birthd != null">
-			, birthd = #{birthd}
-		</if>
-		<if test="agreePrivacy3Party != null">
-			, agree_privacy_3party =  #{agreePrivacy3Party}
-		</if>
-		<if test="fcmNotice != null">
-			, fcm_notice = #{fcmNotice}
-		</if>
-		<if test="fcmGroupNotice != null">
-			, fcm_group_notice = #{fcmGroupNotice}
-		</if>
-		<if test="address != null">
-			, address = #{address}
-		</if>
-		<if test="addressDetail != null">
-			, address_detail = #{addressDetail}
-		</if>
-
-		WHERE group_id = #{id}
-	</update>
-
-	<update id="delete" parameterType="String">
-		UPDATE groups SET
-			removed = 1,
-			removed_time = NOW()
-		WHERE id = #{id}
-	</update>
 </mapper>

@@ -15,7 +15,7 @@ public class GroupVO {
 	private String representImage;	// 대표사진
 	private String approveYn;		// 승인여부
 	private boolean removeRepresentImage;
-	private String backgroundmage;	// 배경사진
+	private String backgroundImage;	// 배경사진
 	private boolean removeBackgroundmage;
 	
 	public String getApproveYn() {
@@ -114,12 +114,12 @@ public class GroupVO {
 		this.removeRepresentImage = removeRepresentImage;
 	}
 
-	public String getBackgroundmage() {
-		return this.backgroundmage;
+	public String getBackgroundImage() {
+		return this.backgroundImage;
 	}
 
-	public void setBackgroundmage(String backgroundmage) {
-		this.backgroundmage = backgroundmage;
+	public void setBackgroundmage(String backgroundImage) {
+		this.backgroundImage = backgroundImage;
 	}
 
 	public boolean isRemoveBackgroundmage() {

@@ -108,7 +108,7 @@ public class GroupServiceImpl implements GroupService {
 			return false;
 		}
 
-		if (Utils.isEqual(GroupManagerVO.TYPE_MASTER, groupManagerVO.getType())) {	// 그룹장이 아닌 경우
+		if (!Utils.isEqual(GroupManagerVO.TYPE_MASTER, groupManagerVO.getType())) {	// 그룹장이 아닌 경우
 			return false;
 		}
 

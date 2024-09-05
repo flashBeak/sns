@@ -8,14 +8,14 @@ DROP TABLE IF EXISTS `files`;
 DROP TABLE IF EXISTS `schedule_join`;
 DROP TABLE IF EXISTS `schedule`;
 DROP TABLE IF EXISTS `category_permission`;
-DROP TABLE IF EXISTS `group_manager`;
-DROP TABLE IF EXISTS `group_member`;
-DROP TABLE IF EXISTS `group_notice`;
 DROP TABLE IF EXISTS `post_like`;
 DROP TABLE IF EXISTS `view`;
 DROP TABLE IF EXISTS `comment`;
 DROP TABLE IF EXISTS `post`;
 DROP TABLE IF EXISTS `board`;
+DROP TABLE IF EXISTS `group_manager`;
+DROP TABLE IF EXISTS `group_member`;
+DROP TABLE IF EXISTS `group_notice`;
 DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `qna`;
 DROP TABLE IF EXISTS `notice`;
@@ -80,7 +80,7 @@ CREATE TABLE `group` (	-- 그룹
 	`address_detail` VARCHAR(255),	-- 상세주소
 	`introduce` TEXT,	-- 소개
 	`etc` TEXT,	-- 기타
-	`lot` FLOAT,	-- 경도 x
+	`lon` FLOAT,	-- 경도 x
 	`lat` FLOAT,	-- 위도 y
 	`phone` VARCHAR(20),	-- 전화번호
 	`approve_yn` CHAR(1) DEFAULT 'N',	-- 가입 승인 여부
@@ -212,7 +212,6 @@ CREATE TABLE `post` (	-- 게시물
     INDEX `index_post_group_member_id` (`group_member_id`),
 	INDEX `index_post_group_id` (`group_id`),
 	INDEX `index_post_board_id` (`board_id`),
-	INDEX `index_post_type` (`type`),
     CONSTRAINT `fk_post_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON UPDATE CASCADE,
 	CONSTRAINT `fk_post_board_id` FOREIGN KEY (`board_id`) REFERENCES `board` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_post_group_id` FOREIGN KEY (`group_id`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -221,27 +220,27 @@ CREATE TABLE `post` (	-- 게시물
 CREATE TABLE `comment` (	-- 댓글
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
 	`parent_id` INT(10) UNSIGNED,	-- 대댓글까지만 허용
-	`user_id` INT(10) UNSIGNED NOT NULL,
+	`group_member_id` INT(10) UNSIGNED NOT NULL,
 	`post_id` INT(10) UNSIGNED NOT NULL,
 	`contents` TEXT,	-- 내용
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`modifyd` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	
-	INDEX `index_comment_user_id` (`user_id`),
+	INDEX `index_comment_group_member_id` (`group_member_id`),
 	INDEX `index_comment_post_id` (`post_id`),
-    CONSTRAINT `fk_comment_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_comment_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_comment_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `view` (	-- 조회수
     `id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	`user_id` INT(10) UNSIGNED NOT NULL,
+	`group_member_id` INT(10) UNSIGNED NOT NULL,
 	`post_id` INT(10) UNSIGNED NOT NULL,
 	`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	
-	INDEX `index_view_like_user_id` (`user_id`),
+	INDEX `index_view_like_group_member_id` (`group_member_id`),
 	INDEX `index_view_like_post_id` (`post_id`),
-    CONSTRAINT `fk_view_like_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_view_like_group_member_id` FOREIGN KEY (`group_member_id`) REFERENCES `group_member` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `fk_view_like_post_id` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

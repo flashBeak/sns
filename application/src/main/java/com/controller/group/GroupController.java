@@ -188,7 +188,7 @@ public class GroupController {
 
 		try {
 			// 주소지 정보로 좌표 정보 가져오기
-			if (Utils.isNullOrEmpty(groupVO.getAddress())) {	// 주소지 정보가 있는 경우
+			if (!Utils.isNullOrEmpty(groupVO.getAddress())) {	// 주소지 정보가 있는 경우
 				// 주소 정보를 gps로 변환
 				Map<String, Object> resultMapSearchAddress = NaverMapManager.searchAddress(groupVO.getAddress());
 				if (resultMapSearchAddress != null) { // 주소가 없는 경우는 별도 처리 없음.
@@ -281,6 +281,7 @@ public class GroupController {
 			returnMap.put("message", Constants.RESULT_MSG_SUCCESS);
 			return returnMap;
 		} catch (Exception e) {
+			e.printStackTrace();
 			TransactionManager.rollback(txStatus);	// 트랜잭션 롤백
 
 			returnMap.put("code", Constants.RESULT_CODE_FAIL_TO_INSERT);
@@ -366,7 +367,7 @@ public class GroupController {
 			groupVO.setRepresentImage((String)resultMapRepresentImage.get("fileName"));
 
 			// 배경사진 추가
-			Map<String, Object> resultMapBackgroundImage = fileService.update(multiRequest, FILE_PATH, item.getBackgroundmage(), "addBackgroundmage", groupVO.isRemoveBackgroundmage());
+			Map<String, Object> resultMapBackgroundImage = fileService.update(multiRequest, FILE_PATH, item.getBackgroundImage(), "addBackgroundmage", groupVO.isRemoveBackgroundmage());
 			if (!resultMapBackgroundImage.get("code").equals(Constants.RESULT_CODE_SUCCESS)) {
 				TransactionManager.rollback(txStatus);	// 트랜잭션 롤백
 

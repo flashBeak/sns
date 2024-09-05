@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.model.common.ParamResult;
 import com.bussiness.TransactionManager;
-import com.bussiness.Utils;
 import com.model.Constants;
 import com.model.UserVO;
 import com.service.common.FileService;
@@ -50,9 +49,9 @@ public class UserController {
 
     	Map<String, Object> returnMap = new HashMap<String, Object>();
 
-		String userId = (String) request.getSession().getAttribute("userId");
+		String id = (String) request.getSession().getAttribute("userId");
     	
-    	UserVO item = userService.get(userId);
+    	UserVO item = userService.get(id);
 		if (item == null) {
 			returnMap.put("code", Constants.RESULT_CODE_NO_ITEM);
 			returnMap.put("message", Constants.RESULT_MSG_NO_ITEM);
@@ -68,9 +67,9 @@ public class UserController {
 
 	/**
 	 * 회원가입
-	 * @param naver_id			네이버 아이디
-	 * @param kakao_id			카카오 아이디
-	 * @param apple_id			애플 아이디
+	 * @param naverId			네이버 아이디
+	 * @param kakaoId			카카오 아이디
+	 * @param appleId			애플 아이디
 	 * @param gender			0 남자, 1 여자
 	 * @param phone				전화번호
 	 * @param fullName			이름
@@ -135,7 +134,6 @@ public class UserController {
 
 	/**
 	 * 정보 변경
-	 * @param id
 	 * @param phone				전화번호
 	 * @param gender			0 남자, 1 여자
 	 * @param full_name			이름
@@ -153,33 +151,30 @@ public class UserController {
 
     	Map<String, Object> returnMap = new HashMap<String, Object>();
 		
-		String [] params = {"id", "fullName", "phone"};
+		String [] params = {"fullName", "phone"};
 		ParamResult paramResult = ParamResult.valid(request, params);	// 필수인자 확인
 		if (paramResult.code != Constants.RESULT_CODE_SUCCESS) {
 			returnMap.put("code", paramResult.code);
 			returnMap.put("message", paramResult.message);
 			return returnMap;
 		}
+
+		String userId = (String) request.getSession().getAttribute("userId");
 		
 		// 기존 아이템 정보 가져오기
-		UserVO item = userService.get(userVO.getId());
+		UserVO item = userService.get(userId);
 		if (item == null) {
 			returnMap.put("code", Constants.RESULT_CODE_NO_ITEM);
 			returnMap.put("message", Constants.RESULT_MSG_NO_ITEM);
 			return returnMap;
 		}
 		
-		String encryptedPassword = Utils.encodeSHA256(userVO.getPassword());
-		
-		// 비밀번호가 변경 되었는지 확인
-		if (!Utils.isNullOrEmpty(userVO.getPassword()) && !encryptedPassword.equals(item.getPassword())) {
-			userVO.setNewPassword(encryptedPassword);
-		}
-
 		// 트랜잭션 설정
 		TransactionStatus txStatus = TransactionManager.start(txManager);
 
 		try {
+			userVO.setId(userId);
+
 			// 정보 수정
 			int result = userService.update(userVO);
 			if (result <= 0) {
